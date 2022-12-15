@@ -1,0 +1,159 @@
+version: '3'
+
+networks:
+  overrun-net-api:
+  traefik-public:
+    external: true
+
+volumes:
+  certs:
+
+
+services:
+  certs-downloader:
+    image: alpine
+    command: sh -c "cd /etc/ssl/traefik && wget https://traefik.me/cert.pem -O cert.pem && wget https://traefik.me/privkey.pem -O privkey.pem"
+    volumes:
+      - certs:/etc/ssl/traefik
+
+  traefik:
+    image: traefik:v2.3
+    restart: always
+    command:
+      # Docker config
+      - "--providers.docker=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=traefik-public"
+      # Additional config with files
+      - "--providers.file=true"
+      - "--providers.file.directory=/etc/traefik"
+      # Entrypoint
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # HTTP -> HTTPS
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      # Enable Dashboard
+      - "--api.dashboard=true"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/ssl/traefik
+      - ./assets/traefik/tls.yml:/etc/traefik/tls.yml
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.services.traefik.loadbalancer.server.port=888"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=user:$$apr1$$mv/7eBGq$$blXoet7kdjDve702x5gLx/"
+
+  backend:
+    container_name: overrun_backend
+    restart: unless-stopped
+    user: ${MY_UID}:${MY_GID}
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 8081:8000
+    networks:
+      - overrun-net-api
+      - traefik-public
+    volumes:
+      - ../backend:/app
+      - ./data/overrun/backend:/usr/app/src/uploads
+    environment:
+      EMAIL_ADDRESS: ${OVERRUN_EMAIL_ADDRESS}
+      EMAIL_PASSWORD: ${OVERRUN_EMAIL_PASSWORD}
+      DATABASE_URL: postgresql://${OVERRUN_DATABASE_USERNAME}:${OVERRUN_DATABASE_PASSWORD}@overrun_postgresql:5432/${OVERRUN_DATABASE_NAME}
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.overrun-backend.tls=true"
+      - "traefik.http.routers.overrun-backend.tls.certresolver=le"
+      - "traefik.http.routers.overrun-backend.entrypoints=websecure"
+      - "traefik.http.services.overrun-backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.overrun-backend.rule=(Host(`overrun.${DOMAIN}`) && PathPrefix(`/api`))"
+
+  postgresql:
+    image: postgres
+    container_name: overrun_postgresql
+    restart: unless-stopped
+    networks:
+      - overrun-net-api
+    volumes:
+      - ./data/overrun/postgresql:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${OVERRUN_DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${OVERRUN_DATABASE_PASSWORD}
+      POSTGRES_DB: ${OVERRUN_DATABASE_NAME}
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    networks:
+      - overrun-net-api
+      - traefik-public
+    environment:
+      ADMINER_DEFAULT_SERVER: overrun_postgresql
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.overrun-dev-adminer.tls=true"
+      - "traefik.http.routers.overrun-dev-adminer.entrypoints=websecure"
+      - "traefik.http.services.overrun-dev-adminer.loadbalancer.server.port=8080"
+      - "traefik.http.routers.overrun-dev-adminer.rule=(Host(`overrun.${DOMAIN}`) && PathPrefix(`/adminer`))"
+      - "traefik.http.routers.overrun-dev-adminer.middlewares=overrun-adminer-strip"
+      - "traefik.http.middlewares.overrun-adminer-strip.stripprefix.prefixes=/adminer"
+
+
+  frontend-user:
+    container_name: overrun_frontend_user
+    restart: unless-stopped
+    user: ${MY_UID}:${MY_GID}
+    build:
+      context: ../frontend-user
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../frontend-user:/app
+    ports:
+      - 8082:8080
+    networks:
+      - traefik-public
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.overrun-frontend-user.tls=true"
+      - "traefik.http.routers.overrun-frontend-user.tls.certresolver=le"
+      - "traefik.http.routers.overrun-frontend-user.entrypoints=websecure"
+      - "traefik.http.services.overrun-frontend-user.loadbalancer.server.port=8080"
+      - "traefik.http.routers.overrun-frontend-user.rule=Host(`overrun.${DOMAIN}`)"
+  
+  frontend-admin:
+    container_name: overrun_frontend_admin
+    restart: unless-stopped
+    user: ${MY_UID}:${MY_GID}
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 8083:8080
+    volumes:
+      - ../frontend:/app
+    networks:
+      - traefik-public
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.overrun-frontend-admin.tls=true"
+      - "traefik.http.routers.overrun-frontend-admin.tls.certresolver=le"
+      - "traefik.http.routers.overrun-frontend-admin.entrypoints=websecure"
+      - "traefik.http.services.overrun-frontend-admin.loadbalancer.server.port=8080"
+      - "traefik.http.routers.overrun-frontend-admin.rule=Host(`admin-overrun.${DOMAIN}`)"

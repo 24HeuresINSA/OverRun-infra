@@ -156,4 +156,4 @@ services:
       - "traefik.http.routers.overrun-frontend-admin.tls.certresolver=le"
       - "traefik.http.routers.overrun-frontend-admin.entrypoints=websecure"
       - "traefik.http.services.overrun-frontend-admin.loadbalancer.server.port=8080"
-      - "traefik.http.routers.overrun-frontend-admin.rule=Host(`admin-overrun.${DOMAIN}`)"
+      - "traefik.http.routers.overrun-frontend-admin.rule=(Host(`overrun.${DOMAIN}`) && PathPrefix(`/admin`))"

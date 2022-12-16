@@ -75,7 +75,6 @@ services:
       EMAIL_PASSWORD: ${OVERRUN_EMAIL_PASSWORD}
       DATABASE_URL: postgresql://${OVERRUN_DATABASE_USERNAME}:${OVERRUN_DATABASE_PASSWORD}@overrun_postgresql:5432/${OVERRUN_DATABASE_NAME}
     labels:
-      - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
       - "traefik.http.routers.overrun-backend.tls=true"
       - "traefik.http.routers.overrun-backend.tls.certresolver=le"
@@ -128,7 +127,6 @@ services:
     networks:
       - traefik-public
     labels:
-      - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
       - "traefik.http.routers.overrun-frontend-user.tls=true"
       - "traefik.http.routers.overrun-frontend-user.tls.certresolver=le"
@@ -150,7 +148,6 @@ services:
     networks:
       - traefik-public
     labels:
-      - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
       - "traefik.http.routers.overrun-frontend-admin.tls=true"
       - "traefik.http.routers.overrun-frontend-admin.tls.certresolver=le"

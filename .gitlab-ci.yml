@@ -1,0 +1,21 @@
+
+stages:
+  - triage
+
+triage:
+  stage: triage
+  image: ruby:2.7
+  script:
+    - gem install gitlab-triage
+    - |
+      for FOLDER in $(ls .gitlab/triage_policies)
+      do
+        for FILE in $(ls .gitlab/triage_policies/$FOLDER)
+        do
+        gitlab-triage --token $GITLAB_API_TOKEN --source projects --source-id 24-heures-insa/overrun/$FOLDER --policies-file .gitlab/triage_policies/$FOLDER/$FILE
+        done
+      done
+  rules:
+    - if: ($CI_PIPELINE_SOURCE == "schedule") && ($TRIAGE == "1")
+      when: always
+    - when: never

@@ -1,0 +1,11 @@
+resource_rules:
+  merge_requests:
+    rules:
+      - name: find all opened MR without scope and forbidden scope label
+        conditions:
+          state: opened
+          forbidden_labels:
+            - Scope::Frontend Admin
+        actions:
+          labels:
+            - Scope::Frontend Admin

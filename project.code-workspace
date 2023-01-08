@@ -21,13 +21,13 @@
     "recommendations": [
       "vivaxy.vscode-conventional-commits",
       "ms-azuretools.vscode-docker",
-      "EditorConfig.EditorConfig",
       "usernamehw.errorlens",
       "mhutchie.git-graph",
       "eamodio.gitlens",
       "Prisma.prisma",
       "dbaeumer.vscode-eslint",
-      "kamikillerto.vscode-colorize"
+      "kamikillerto.vscode-colorize",
+      "Vue.volar"
     ]
   },
   "settings": {
@@ -36,7 +36,8 @@
       "Docker",
       "Front-user",
       "Front-admin",
-      "Back"
+      "Back",
+      "store"
     ],
     "cSpell.enabled": false,
     "colorize.languages": ["javascript", "json"],
@@ -52,6 +53,9 @@
     },
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
-    "editor.codeActionsOnSave": ["source.organizeImports"]
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true,
+      "source.fixAll": true
+    }
   }
 }

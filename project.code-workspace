@@ -40,7 +40,7 @@
       "store"
     ],
     "cSpell.enabled": false,
-    "colorize.languages": ["javascript", "json"],
+    "colorize.languages": ["javascript", "json", "vue"],
     "files.watcherExclude": {
       "**/.git/objects/**": true,
       "**/.git/subtree-cache/**": true,

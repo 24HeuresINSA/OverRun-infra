@@ -69,7 +69,6 @@ services:
       - traefik-public
     volumes:
       - ../backend:/app
-      - ./data/overrun/backend:/usr/app/src/uploads
     environment:
       EMAIL_ADDRESS: ${OVERRUN_EMAIL_ADDRESS}
       EMAIL_PASSWORD: ${OVERRUN_EMAIL_PASSWORD}
@@ -113,7 +112,6 @@ services:
       - "traefik.http.routers.overrun-dev-adminer.middlewares=overrun-adminer-strip"
       - "traefik.http.middlewares.overrun-adminer-strip.stripprefix.prefixes=/adminer"
 
-
   frontend-user:
     container_name: overrun_frontend_user
     restart: unless-stopped
@@ -134,7 +132,7 @@ services:
       - "traefik.http.routers.overrun-frontend-user.entrypoints=websecure"
       - "traefik.http.services.overrun-frontend-user.loadbalancer.server.port=8080"
       - "traefik.http.routers.overrun-frontend-user.rule=Host(`overrun.${DOMAIN}`)"
-  
+
   frontend-admin:
     container_name: overrun_frontend_admin
     restart: unless-stopped

@@ -37,7 +37,8 @@
       "Front-user",
       "Front-admin",
       "Back",
-      "store"
+      "store",
+      "payment"
     ],
     "cSpell.enabled": false,
     "colorize.languages": ["javascript", "json", "vue"],

@@ -74,6 +74,11 @@ services:
       EMAIL_PASSWORD: ${OVERRUN_EMAIL_PASSWORD}
       DATABASE_URL: postgresql://${OVERRUN_DATABASE_USERNAME}:${OVERRUN_DATABASE_PASSWORD}@overrun_postgresql:5432/${OVERRUN_DATABASE_NAME}
       FRONTEND_URL: ${OVERRUN_FRONTEND_URL}
+      HELLOASSO_CLIENT_ID:
+      HELLOASSO_CLIENT_SECRET:
+      HELLOASSO_BASE_URL:
+      HELLOASSO_ORGANISATION_SLUG:
+      HELLOASSO_TOKEN:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.overrun-backend.tls=true"

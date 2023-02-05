@@ -79,6 +79,11 @@ services:
       HELLOASSO_BASE_URL:
       HELLOASSO_ORGANISATION_SLUG:
       HELLOASSO_TOKEN:
+      EDB_VA_TOKEN:
+      EDB_VA_CLIENT_ID:
+      EDB_REALM:
+      EDB_SSO_ENDPOINT:
+      EDB_VA_ENDPOINT:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.overrun-backend.tls=true"

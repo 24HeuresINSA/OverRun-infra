@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 networks:
   overrun-net-api:
@@ -7,7 +7,6 @@ networks:
 
 volumes:
   certs:
-
 
 services:
   certs-downloader:
@@ -56,7 +55,7 @@ services:
       - "traefik.http.middlewares.traefik-auth.basicauth.users=user:$$apr1$$mv/7eBGq$$blXoet7kdjDve702x5gLx/"
 
   backend:
-    container_name: overrun_backend
+    container_name: old_overrun_backend
     restart: unless-stopped
     user: ${MY_UID}:${MY_GID}
     build:
@@ -72,7 +71,7 @@ services:
     environment:
       EMAIL_ADDRESS: ${OVERRUN_EMAIL_ADDRESS}
       EMAIL_PASSWORD: ${OVERRUN_EMAIL_PASSWORD}
-      DATABASE_URL: postgresql://${OVERRUN_DATABASE_USERNAME}:${OVERRUN_DATABASE_PASSWORD}@overrun_postgresql:5432/${OVERRUN_DATABASE_NAME}
+      DATABASE_URL: postgresql://${OVERRUN_DATABASE_USERNAME}:${OVERRUN_DATABASE_PASSWORD}@old_overrun_postgresql:5432/${OVERRUN_DATABASE_NAME}
       FRONTEND_URL: ${OVERRUN_FRONTEND_URL}
       HELLOASSO_CLIENT_ID:
       HELLOASSO_CLIENT_SECRET:
@@ -94,7 +93,7 @@ services:
 
   postgresql:
     image: postgres
-    container_name: overrun_postgresql
+    container_name: old_overrun_postgresql
     restart: unless-stopped
     networks:
       - overrun-net-api
@@ -112,7 +111,7 @@ services:
       - overrun-net-api
       - traefik-public
     environment:
-      ADMINER_DEFAULT_SERVER: overrun_postgresql
+      ADMINER_DEFAULT_SERVER: old_overrun_postgresql
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.overrun-dev-adminer.tls=true"
@@ -123,7 +122,7 @@ services:
       - "traefik.http.middlewares.overrun-adminer-strip.stripprefix.prefixes=/adminer"
 
   frontend-user:
-    container_name: overrun_frontend_user
+    container_name: old_overrun_frontend_user
     restart: unless-stopped
     user: ${MY_UID}:${MY_GID}
     build:
@@ -144,7 +143,7 @@ services:
       - "traefik.http.routers.overrun-frontend-user.rule=Host(`overrun.${DOMAIN}`)"
 
   frontend-admin:
-    container_name: overrun_frontend_admin
+    container_name: old_overrun_frontend_admin
     restart: unless-stopped
     user: ${MY_UID}:${MY_GID}
     build:
